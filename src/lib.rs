@@ -27,6 +27,10 @@ fn g(rd: f32) -> f32 {
     (1f32 + 3f32 * Q.powi(2) * rd.powi(2) / std::f32::consts::PI.powi(2)).sqrt().recip()
 }
 
+fn e(r: f32, r_j: f32, rd_j: f32) -> f32 {
+    (1f32 + 10f32.powf(-g(rd_j)*(r - r_j)/400f32)).recip()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
