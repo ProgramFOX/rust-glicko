@@ -1,6 +1,6 @@
-struct RatedPlayer {
-    rating: f32,
-    rd: f32,
+pub struct RatedPlayer {
+    pub rating: f32,
+    pub rd: f32,
 }
 
 impl RatedPlayer {
