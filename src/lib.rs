@@ -21,7 +21,7 @@ impl RatedPlayer {
     }
 }
 
-const Q: f32 = 0.0057565;
+const Q: f32 = 0.0057564627324851142100449786;
 
 fn g(rd: f32) -> f32 {
     (1f32 + 3f32 * Q.powi(2) * rd.powi(2) / std::f32::consts::PI.powi(2)).sqrt().recip()
