@@ -1,0 +1,6 @@
+[package]
+name = "glicko"
+version = "0.1.0"
+authors = ["ProgramFOX <programfox@hotmail.be>"]
+
+[dependencies]
