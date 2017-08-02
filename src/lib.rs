@@ -21,6 +21,8 @@ impl RatedPlayer {
     }
 }
 
+const Q: f32 = 0.0057565;
+
 #[cfg(test)]
 mod tests {
     #[test]
