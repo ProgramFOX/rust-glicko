@@ -23,6 +23,10 @@ impl RatedPlayer {
 
 const Q: f32 = 0.0057565;
 
+fn g(rd: f32) -> f32 {
+    (1f32 + 3f32 * Q.powi(2) * rd.powi(2) / std::f32::consts::PI.powi(2)).sqrt().recip()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
