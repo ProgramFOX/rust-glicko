@@ -57,6 +57,10 @@ impl RatingCalculator {
             games: vec![],
         }
     }
+
+    pub fn add_game(&mut self, game: RatedGame) {
+        self.games.push(game);
+    }
 }
 
 #[cfg(test)]
