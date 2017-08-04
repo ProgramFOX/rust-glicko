@@ -86,6 +86,30 @@ impl RatingCalculator {
 
         (Q.powi(2) * sum).recip()
     }
+
+    pub fn calculate_new_rating(&self) -> RatedPlayer {
+        let r = self.player.rating;
+        let rd = self.player.rd;
+
+        let mut sum = 0f32;
+        for game in &self.games {
+            let r_j = game.opponent.rating;
+            let rd_j = game.opponent.rd;
+            let s_j = game.outcome.numeric_value();
+
+            sum += g(rd_j) * (s_j - e(r, r_j, rd_j));
+        }
+
+        let d_2 = self.d2();
+
+        let new_r = r + (Q / (rd.powi(2).recip() + d_2.recip())) * sum;
+        let new_rd = (rd.powi(2).recip() + d_2.recip()).recip().sqrt();
+
+        RatedPlayer {
+            rating: new_r,
+            rd: new_rd,
+        }
+    }
 }
 
 #[cfg(test)]
