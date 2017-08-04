@@ -31,6 +31,22 @@ fn e(r: f32, r_j: f32, rd_j: f32) -> f32 {
     (1f32 + 10f32.powf(-g(rd_j)*(r - r_j)/400f32)).recip()
 }
 
+pub enum Outcome {
+    Win,
+    Draw,
+    Loss,
+}
+
+pub struct RatedGame {
+    pub outcome: Outcome,
+    pub opponent: RatedPlayer,
+}
+
+pub struct RatingCalculator {
+    player: RatedPlayer,
+    games: Vec<RatedGame>,
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
