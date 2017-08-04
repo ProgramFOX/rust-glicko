@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct RatedPlayer {
     pub rating: f32,
     pub rd: f32,
@@ -31,12 +32,14 @@ fn e(r: f32, r_j: f32, rd_j: f32) -> f32 {
     (1f32 + 10f32.powf(-g(rd_j)*(r - r_j)/400f32)).recip()
 }
 
+#[derive(Copy, Clone)]
 pub enum Outcome {
     Win,
     Draw,
     Loss,
 }
 
+#[derive(Copy, Clone)]
 pub struct RatedGame {
     pub outcome: Outcome,
     pub opponent: RatedPlayer,
