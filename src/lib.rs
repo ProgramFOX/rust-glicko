@@ -78,7 +78,6 @@ impl RatingCalculator {
         for game in &self.games {
             let r_j = game.opponent.rating;
             let rd_j = game.opponent.rd;
-            let s_j = game.outcome.numeric_value();
 
             let result_of_e = e(r, r_j, rd_j);
             sum += g(rd_j).powi(2) * result_of_e * (1f32 - result_of_e);
