@@ -47,6 +47,15 @@ pub struct RatingCalculator {
     games: Vec<RatedGame>,
 }
 
+impl RatingCalculator {
+    pub fn for_player(player: RatedPlayer) -> RatingCalculator {
+        RatingCalculator {
+            player: player,
+            games: vec![],
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
