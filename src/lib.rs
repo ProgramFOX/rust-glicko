@@ -39,6 +39,16 @@ pub enum Outcome {
     Loss,
 }
 
+impl Outcome {
+    fn numeric_value(&self) -> f32 {
+        match *self {
+            Outcome::Win => 1f32,
+            Outcome::Draw => 0.5f32,
+            Outcome::Loss => 0f32,
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct RatedGame {
     pub outcome: Outcome,
@@ -60,6 +70,21 @@ impl RatingCalculator {
 
     pub fn add_game(&mut self, game: RatedGame) {
         self.games.push(game);
+    }
+
+    fn d2(&self) -> f32 {
+        let mut sum = 0f32;
+        let r = self.player.rating;
+        for game in &self.games {
+            let r_j = game.opponent.rating;
+            let rd_j = game.opponent.rd;
+            let s_j = game.outcome.numeric_value();
+
+            let result_of_e = e(r, r_j, rd_j);
+            sum += g(rd_j).powi(2) * result_of_e * (1f32 - result_of_e);
+        }
+
+        (Q.powi(2) * sum).recip()
     }
 }
 
