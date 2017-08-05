@@ -111,6 +111,59 @@ impl RatingCalculator {
     }
 }
 
+#[derive(Copy, Clone)]
+pub struct IndexedRatedPlayer {
+    pub rating: f32,
+    pub rd: f32,
+    index: usize
+}
+
+impl IndexedRatedPlayer {
+    fn without_index(&self) -> RatedPlayer {
+        RatedPlayer {
+            rating: self.rating,
+            rd: self.rd,
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct RatingPeriod {
+    players: Vec<IndexedRatedPlayer>,
+    calculators: Vec<RatingCalculator>
+}
+
+impl RatingPeriod {
+    pub fn new() -> RatingPeriod {
+        RatingPeriod {
+            players: vec![],
+            calculators: vec![],
+        }
+    }
+
+    pub fn add_player(&mut self, player: RatedPlayer) -> IndexedRatedPlayer {
+        let index = self.players.len();
+        self.calculators.push(RatingCalculator::for_player(player));
+        let irp = IndexedRatedPlayer {
+            rating: player.rating,
+            rd: player.rd,
+            index: index,
+        };
+        self.players.push(irp);
+        irp
+    }
+
+    pub fn add_result(&mut self, winner: IndexedRatedPlayer, loser: IndexedRatedPlayer) {
+        self.calculators[winner.index].add_game(RatedGame { outcome: Outcome::Win, opponent: loser.without_index() });
+        self.calculators[loser.index].add_game(RatedGame { outcome: Outcome::Loss, opponent: winner.without_index() });
+    }
+
+    pub fn add_draw(&mut self, player1: IndexedRatedPlayer, player2: IndexedRatedPlayer) {
+        self.calculators[player1.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player2.without_index() });
+        self.calculators[player2.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player1.without_index() });
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
