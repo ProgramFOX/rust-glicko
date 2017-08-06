@@ -253,4 +253,18 @@ mod tests {
         assert_eq!(new_without_games.rating, no_games_played.rating);
         assert_eq!(new_without_games.rd, no_games_played.rd);
     }
+
+    #[test]
+    fn rated_player_constructors() {
+        assert_eq!(350f32, RatedPlayer::from_rating_and_rd_and_inactivity_c(1500f32, 349f32, 75f32).rd);
+        assert_eq!(350f32, RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1500f32, 349f32, 75f32, 2).rd);
+
+        let player = RatedPlayer::from_rating_and_rd_and_inactivity_c(1600.5, 80f32, 75f32);
+        assert_eq!(1600.5, player.rating);
+        assert_close_enough(109.658, player.rd);
+
+        let player = RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1700f32, 65.3, 63.2, 3);
+        assert_eq!(1700f32, player.rating);
+        assert_close_enough(127.463, player.rd);
+    }
 }
