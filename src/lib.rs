@@ -183,7 +183,74 @@ impl RatingPeriod {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    fn are_close_enough(a: f32, b: f32) -> bool {
+        let r = (a - b).abs() <= 0.001;
+        if !r {
+            println!("a: {}, b: {}", a, b);
+        }
+        r
+    }
+
+    fn assert_close_enough(a: f32, b: f32) {
+        assert!(are_close_enough(a, b));
+    }
+
     #[test]
-    fn it_works() {
+    fn calculation_separate_steps_for_one_player_and_opponents() {
+        // Value taken from http://glicko.net/glicko/glicko.pdf at "Example calculation"
+
+        let player = RatedPlayer::from_rating_and_rd(1500f32, 200f32);
+        let opp1 = RatedPlayer::from_rating_and_rd(1400f32, 30f32);
+        let opp2 = RatedPlayer::from_rating_and_rd(1550f32, 100f32);
+        let opp3 = RatedPlayer::from_rating_and_rd(1700f32, 300f32);
+
+        assert_close_enough(0.9955, g(opp1.rd));
+        assert_close_enough(0.9531, g(opp2.rd));
+        assert_close_enough(0.7242, g(opp3.rd));
+
+        assert_close_enough(0.639, e(player.rating, opp1.rating, opp1.rd));
+        assert_close_enough(0.432, e(player.rating, opp2.rating, opp2.rd));
+        assert_close_enough(0.303, e(player.rating, opp3.rating, opp3.rd));
+
+        let mut calculator = RatingCalculator::for_player(player);
+        calculator.add_game(RatedGame { opponent: opp1, outcome: Outcome::Win });
+        calculator.add_game(RatedGame { opponent: opp2, outcome: Outcome::Loss });
+        calculator.add_game(RatedGame { opponent: opp3, outcome: Outcome::Loss });
+
+        assert_eq!(231.7, (calculator.d2().sqrt() * 10.0).round() / 10.0);
+
+        let new_rating = calculator.calculate_new_rating();
+        assert_eq!(1464f32, new_rating.rating.round());
+        assert_eq!(151.4, (new_rating.rd * 10.0).round() / 10.0);
+
+        let mut period = RatingPeriod::new();
+        let player = period.add_player(player);
+        assert_eq!(0, player.index);
+        let opp1 = period.add_player(opp1);
+        assert_eq!(1, opp1.index);
+        let opp2 = period.add_player(opp2);
+        assert_eq!(2, opp2.index);
+        let opp3 = period.add_player(opp3);
+        assert_eq!(3, opp3.index);
+        let no_games_played = period.add_player(RatedPlayer::from_rating_and_rd(1800f32, 45f32));
+        assert_eq!(4, no_games_played.index);
+        period.add_result(player, opp1);
+        period.add_result(opp2, player);
+        period.add_result(opp3, player);
+
+        let new_ratings = period.calculate_new_ratings();
+        let (new_player, new_opp1, new_opp2, new_opp3, new_without_games) = (new_ratings[0], new_ratings[1], new_ratings[2], new_ratings[3], new_ratings[4]);
+        assert_eq!(1464f32, new_player.rating.round());
+        assert_eq!(151.4, (new_player.rd * 10.0).round() / 10.0);
+        assert!(new_opp1.rating < opp1.rating);
+        assert!(new_opp2.rating > opp2.rating);
+        assert!(new_opp3.rating > opp3.rating);
+        assert!(new_opp1.rd < opp1.rd);
+        assert!(new_opp2.rd < opp2.rd);
+        assert!(new_opp3.rd < opp3.rd);
+        assert_eq!(new_without_games.rating, no_games_played.rating);
+        assert_eq!(new_without_games.rd, no_games_played.rd);
     }
 }
