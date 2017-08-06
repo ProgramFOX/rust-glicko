@@ -162,6 +162,14 @@ impl RatingPeriod {
         self.calculators[player1.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player2.without_index() });
         self.calculators[player2.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player1.without_index() });
     }
+
+    pub fn calculate_new_ratings(&self) -> Vec<RatedPlayer> {
+        let mut result = vec![];
+        for calculator in &self.calculators {
+            result.push(calculator.calculate_new_rating());
+        }
+        result
+    }
 }
 
 #[cfg(test)]
