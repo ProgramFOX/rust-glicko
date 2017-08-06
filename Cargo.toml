@@ -2,5 +2,6 @@
 name = "glicko"
 version = "0.1.0"
 authors = ["ProgramFOX <programfox@hotmail.be>"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
