@@ -21,7 +21,12 @@ impl RatedPlayer {
         }
     }
 
-    pub fn from_rating_and_rd_and_inactivity_c_and_t(rating: f32, rd: f32, c: f32, t: f32) -> RatedPlayer {
+    pub fn from_rating_and_rd_and_inactivity_c_and_t(
+        rating: f32,
+        rd: f32,
+        c: f32,
+        t: f32,
+    ) -> RatedPlayer {
         let new_rd = (rd.powi(2) + c.powi(2) * t).sqrt();
         let new_rd = if new_rd > 350f32 { 350f32 } else { new_rd };
         RatedPlayer {
@@ -34,11 +39,13 @@ impl RatedPlayer {
 const Q: f32 = 0.0057564627324851142100449786;
 
 fn g(rd: f32) -> f32 {
-    (1f32 + 3f32 * Q.powi(2) * rd.powi(2) / std::f32::consts::PI.powi(2)).sqrt().recip()
+    (1f32 + 3f32 * Q.powi(2) * rd.powi(2) / std::f32::consts::PI.powi(2))
+        .sqrt()
+        .recip()
 }
 
 fn e(r: f32, r_j: f32, rd_j: f32) -> f32 {
-    (1f32 + 10f32.powf(-g(rd_j)*(r - r_j)/400f32)).recip()
+    (1f32 + 10f32.powf(-g(rd_j) * (r - r_j) / 400f32)).recip()
 }
 
 #[derive(Copy, Clone)]
@@ -124,7 +131,7 @@ impl RatingCalculator {
 pub struct IndexedRatedPlayer {
     pub rating: f32,
     pub rd: f32,
-    index: usize
+    index: usize,
 }
 
 impl IndexedRatedPlayer {
@@ -139,7 +146,7 @@ impl IndexedRatedPlayer {
 #[derive(Default)]
 pub struct RatingPeriod {
     players: Vec<IndexedRatedPlayer>,
-    calculators: Vec<RatingCalculator>
+    calculators: Vec<RatingCalculator>,
 }
 
 impl RatingPeriod {
@@ -163,13 +170,25 @@ impl RatingPeriod {
     }
 
     pub fn add_result(&mut self, winner: IndexedRatedPlayer, loser: IndexedRatedPlayer) {
-        self.calculators[winner.index].add_game(RatedGame { outcome: Outcome::Win, opponent: loser.without_index() });
-        self.calculators[loser.index].add_game(RatedGame { outcome: Outcome::Loss, opponent: winner.without_index() });
+        self.calculators[winner.index].add_game(RatedGame {
+            outcome: Outcome::Win,
+            opponent: loser.without_index(),
+        });
+        self.calculators[loser.index].add_game(RatedGame {
+            outcome: Outcome::Loss,
+            opponent: winner.without_index(),
+        });
     }
 
     pub fn add_draw(&mut self, player1: IndexedRatedPlayer, player2: IndexedRatedPlayer) {
-        self.calculators[player1.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player2.without_index() });
-        self.calculators[player2.index].add_game(RatedGame { outcome: Outcome::Draw, opponent: player1.without_index() });
+        self.calculators[player1.index].add_game(RatedGame {
+            outcome: Outcome::Draw,
+            opponent: player2.without_index(),
+        });
+        self.calculators[player2.index].add_game(RatedGame {
+            outcome: Outcome::Draw,
+            opponent: player1.without_index(),
+        });
     }
 
     pub fn calculate_new_ratings(&self) -> Vec<RatedPlayer> {
@@ -215,9 +234,18 @@ mod tests {
         assert_close_enough(0.303, e(player.rating, opp3.rating, opp3.rd));
 
         let mut calculator = RatingCalculator::for_player(player);
-        calculator.add_game(RatedGame { opponent: opp1, outcome: Outcome::Win });
-        calculator.add_game(RatedGame { opponent: opp2, outcome: Outcome::Loss });
-        calculator.add_game(RatedGame { opponent: opp3, outcome: Outcome::Loss });
+        calculator.add_game(RatedGame {
+            opponent: opp1,
+            outcome: Outcome::Win,
+        });
+        calculator.add_game(RatedGame {
+            opponent: opp2,
+            outcome: Outcome::Loss,
+        });
+        calculator.add_game(RatedGame {
+            opponent: opp3,
+            outcome: Outcome::Loss,
+        });
 
         assert_eq!(231.7, (calculator.d2().sqrt() * 10.0).round() / 10.0);
 
@@ -241,7 +269,13 @@ mod tests {
         period.add_result(opp3, player);
 
         let new_ratings = period.calculate_new_ratings();
-        let (new_player, new_opp1, new_opp2, new_opp3, new_without_games) = (new_ratings[0], new_ratings[1], new_ratings[2], new_ratings[3], new_ratings[4]);
+        let (new_player, new_opp1, new_opp2, new_opp3, new_without_games) = (
+            new_ratings[0],
+            new_ratings[1],
+            new_ratings[2],
+            new_ratings[3],
+            new_ratings[4],
+        );
         assert_eq!(1464f32, new_player.rating.round());
         assert_eq!(151.4, (new_player.rd * 10.0).round() / 10.0);
         assert!(new_opp1.rating < opp1.rating);
@@ -256,18 +290,26 @@ mod tests {
 
     #[test]
     fn rated_player_constructors() {
-        assert_eq!(350f32, RatedPlayer::from_rating_and_rd_and_inactivity_c(1500f32, 349f32, 75f32).rd);
-        assert_eq!(350f32, RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1500f32, 349f32, 75f32, 2f32).rd);
+        assert_eq!(
+            350f32,
+            RatedPlayer::from_rating_and_rd_and_inactivity_c(1500f32, 349f32, 75f32).rd
+        );
+        assert_eq!(
+            350f32,
+            RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1500f32, 349f32, 75f32, 2f32).rd
+        );
 
         let player = RatedPlayer::from_rating_and_rd_and_inactivity_c(1600.5, 80f32, 75f32);
         assert_eq!(1600.5, player.rating);
         assert_close_enough(109.658, player.rd);
 
-        let player = RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1700f32, 65.3, 63.2, 3f32);
+        let player =
+            RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1700f32, 65.3, 63.2, 3f32);
         assert_eq!(1700f32, player.rating);
         assert_close_enough(127.463, player.rd);
 
-        let player = RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1700f32, 65.3, 63.2, 0.25);
+        let player =
+            RatedPlayer::from_rating_and_rd_and_inactivity_c_and_t(1700f32, 65.3, 63.2, 0.25);
         assert_eq!(1700f32, player.rating);
         assert_close_enough(72.5441, player.rd);
     }
